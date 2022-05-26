@@ -29,6 +29,13 @@ done
 
 set -- "${POSITIONAL_ARGS[@]}"
 
+install_packages () {
+    if ! rpm -qa | grep ipmitool > /dev/null; then
+        echo "ipmitool package not installed, installing..."
+        dnf install ipmitool -y
+    fi
+}
+
 get_ip () {
     case $HOST in
         r510) 
@@ -43,16 +50,17 @@ get_ip () {
             ;;
     esac
 
-    return $IP_ADDRESS
+    return ${IP_ADDRESS}
 }
 
 main () {
+    install_packages
     get_ip
     
-    ipmitool -I lanplus -H "${IP_ADDRESS}" -U root -P calvin raw 0x30 0x30 0x01 0x00
+    ipmitool -I lanplus -H "${IP_ADDRESS}" -U root -P calvin raw 0x30 0x30 0x01 0x00 > /dev/null
     echo "Dell r510 fan control set to manual"
 
-    ipmitool -I lanplus -H "${IP_ADDRESS}" -U root -P calvin raw 0x30 0x30 0x02 0xff 0x"${SPEED}"
+    ipmitool -I lanplus -H "${IP_ADDRESS}" -U root -P calvin raw 0x30 0x30 0x02 0xff 0x"${SPEED}" > /dev/null
     echo "Fan speed on host ${HOST} set to ${SPEED}%"
 
     if [[ -n $1 ]]; then
