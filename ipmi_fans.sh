@@ -50,23 +50,23 @@ get_ip () {
             ;;
     esac
 
-    return ${IP_ADDRESS}
+    return $IP_ADDRESS
+}
+
+convert_speed () {
+    HEX_SPEED=$(printf '%x\n' ${SPEED})
 }
 
 main () {
     install_packages
     get_ip
+    convert_speed
     
     ipmitool -I lanplus -H "${IP_ADDRESS}" -U root -P calvin raw 0x30 0x30 0x01 0x00 > /dev/null
     echo "Dell r510 fan control set to manual"
 
-    ipmitool -I lanplus -H "${IP_ADDRESS}" -U root -P calvin raw 0x30 0x30 0x02 0xff 0x"${SPEED}" > /dev/null
+    ipmitool -I lanplus -H "${IP_ADDRESS}" -U root -P calvin raw 0x30 0x30 0x02 0xff 0x"${HEX_SPEED}" > /dev/null
     echo "Fan speed on host ${HOST} set to ${SPEED}%"
-
-    if [[ -n $1 ]]; then
-        echo "Last line of file specified as non-opt/last argument:"
-        tail -1 "$1"
-    fi
 }
 
 
