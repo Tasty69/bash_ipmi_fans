@@ -48,9 +48,7 @@ get_ip () {
             echo -n "unknown host"
             exit 1
             ;;
-    esac
-
-    return $IP_ADDRESS
+    esac 
 }
 
 convert_speed () {
@@ -69,5 +67,6 @@ main () {
     echo "Fan speed on host ${HOST} set to ${SPEED}%"
 }
 
-
-main
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi
