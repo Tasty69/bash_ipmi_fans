@@ -71,20 +71,19 @@ convert_speed () {
     HEX_SPEED=$(printf '%x\n' ${SPEED})
 }
 
-#run_command () {
-#
-#}
-
-main () {
-    install_packages
-    get_ip
-    convert_speed
-    
+run_command () {
     ipmitool -I lanplus -H "${IP_ADDRESS}" -U root -P calvin raw 0x30 0x30 0x01 0x00 > /dev/null
     echo "Dell r510 fan control set to manual"
 
     ipmitool -I lanplus -H "${IP_ADDRESS}" -U root -P calvin raw 0x30 0x30 0x02 0xff 0x"${HEX_SPEED}" > /dev/null
     echo "Fan speed on IDRAC ${IDRAC} set to ${SPEED}%"
+}
+
+main () {
+    install_packages
+    get_ip
+    convert_speed
+    run_command
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
