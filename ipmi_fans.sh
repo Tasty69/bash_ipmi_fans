@@ -4,8 +4,8 @@ POSITIONAL_ARGS=()
 
 while [[ $# -gt 0 ]]; do
     case $1 in
-        -h | --host)
-            HOST="$2"
+        -d | --idrac)
+            IDRAC="$2"
             shift 2
             ;;
         -s | --speed)
@@ -47,13 +47,13 @@ install_packages () {
             brew install "${PACKAGE}" -y
         fi
     else
-        echo "Unkown OS"
+        echo -n "Unkown OS"
         exit 1
     fi
 }
 
 get_ip () {
-    case $HOST in
+    case $IDRAC in
         r510) 
             IP_ADDRESS="192.168.165.48"
             ;;
@@ -61,7 +61,7 @@ get_ip () {
             IP_ADDRESS="192.168.165.49"
             ;;
         *)
-            echo -n "unknown host"
+            echo -n "unknown IDRAC"
             exit 1
             ;;
     esac 
@@ -69,6 +69,10 @@ get_ip () {
 
 convert_speed () {
     HEX_SPEED=$(printf '%x\n' ${SPEED})
+}
+
+run_command () {
+
 }
 
 main () {
@@ -80,7 +84,7 @@ main () {
     echo "Dell r510 fan control set to manual"
 
     ipmitool -I lanplus -H "${IP_ADDRESS}" -U root -P calvin raw 0x30 0x30 0x02 0xff 0x"${HEX_SPEED}" > /dev/null
-    echo "Fan speed on host ${HOST} set to ${SPEED}%"
+    echo "Fan speed on IDRAC ${IDRAC} set to ${SPEED}%"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
