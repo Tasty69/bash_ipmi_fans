@@ -35,16 +35,16 @@ install_packages () {
     if [[ "$OSTYPE" == "linux-gnu" ]]; then
         if [ -f /etc/redhat-release ]; then
             if ! rpm -qa | grep "${PACKAGE}" > /dev/null; then
-                dnf install "${PACKAGE}" -y
+                dnf install "${PACKAGE}" -y || exit 1
             fi
         elif [ -f /etc/debian_version ]; then
             if ! dpkg -l | grep "${PACKAGE}" > /dev/null; then
-                apt-get install "${PACKAGE}" -y
+                apt-get install "${PACKAGE}" -y || exit 1
             fi
         fi
     elif [[ "$OSTYPE" == "darwin" ]]; then
         if ! bew list | grep "${PACKAGE}" > /dev/null; then
-            brew install "${PACKAGE}" -y
+            brew install "${PACKAGE}" -y || exit 1
         fi
     else
         echo -n "Unkown OS"
@@ -72,10 +72,10 @@ convert_speed () {
 }
 
 run_command () {
-    ipmitool -I lanplus -H "${IP_ADDRESS}" -U root -P calvin raw 0x30 0x30 0x01 0x00 > /dev/null
+    ipmitool -I lanplus -H "${IP_ADDRESS}" -U root -P calvin raw 0x30 0x30 0x01 0x00 > /dev/null || exit 1
     echo "Dell r510 fan control set to manual"
 
-    ipmitool -I lanplus -H "${IP_ADDRESS}" -U root -P calvin raw 0x30 0x30 0x02 0xff 0x"${HEX_SPEED}" > /dev/null
+    ipmitool -I lanplus -H "${IP_ADDRESS}" -U root -P calvin raw 0x30 0x30 0x02 0xff 0x"${HEX_SPEED}" &> /dev/null
     echo "Fan speed on IDRAC ${IDRAC} set to ${SPEED}%"
 }
 
