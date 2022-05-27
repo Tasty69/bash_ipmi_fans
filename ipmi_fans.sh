@@ -71,9 +71,9 @@ convert_speed () {
     HEX_SPEED=$(printf '%x\n' ${SPEED})
 }
 
-run_command () {
-
-}
+#run_command () {
+#
+#}
 
 main () {
     install_packages
