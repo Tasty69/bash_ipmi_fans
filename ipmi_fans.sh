@@ -30,9 +30,25 @@ done
 set -- "${POSITIONAL_ARGS[@]}"
 
 install_packages () {
-    if ! rpm -qa | grep ipmitool > /dev/null; then
-        echo "ipmitool package not installed, installing..."
-        dnf install ipmitool -y
+    local PACKAGE="ipmitool"
+
+    if [[ "$OSTYPE" == "linux-gnu" ]]; then
+        if [ -f /etc/redhat-release ]; then
+            if ! rpm -qa | grep "${PACKAGE}" > /dev/null; then
+                dnf install "${PACKAGE}" -y
+            fi
+        elif [ -f /etc/debian_version ]; then
+            if ! dpkg -l | grep "${PACKAGE}" > /dev/null; then
+                apt-get install "${PACKAGE}" -y
+            fi
+        fi
+    elif [[ "$OSTYPE" == "darwin" ]]; then
+        if ! bew list | grep "${PACKAGE}" > /dev/null; then
+            brew install "${PACKAGE}" -y
+        fi
+    else
+        echo "Unkown OS"
+        exit 1
     fi
 }
 
