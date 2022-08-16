@@ -35,16 +35,28 @@ install_packages () {
     if [[ "$OSTYPE" == "linux-gnu" ]]; then
         if [ -f /etc/redhat-release ]; then
             if ! rpm -qa | grep "${PACKAGE}" > /dev/null; then
-                dnf install "${PACKAGE}" -y || exit 1
+                dnf install "${PACKAGE}" -y
+                if [ $? != 0 ]; then
+                    echo "[FATAL] Failed to install rpm package"
+                    exit 1
+                fi
             fi
         elif [ -f /etc/debian_version ]; then
             if ! dpkg -l | grep "${PACKAGE}" > /dev/null; then
-                apt-get install "${PACKAGE}" -y || exit 1
+                apt-get install "${PACKAGE}" -y
+                if [ $? != 0 ]; then
+                    echo "[FATAL] Failed to install dpkg package"
+                    exit 1
+                fi
             fi
         fi
     elif [[ "$OSTYPE" == "darwin" ]]; then
         if ! bew list | grep "${PACKAGE}" > /dev/null; then
-            brew install "${PACKAGE}" -y || exit 1
+            brew install "${PACKAGE}" -y
+            if [ $? != 0 ]; then
+                echo "[FATAL] Failed to install brew package"
+                exit 1
+            fi
         fi
     else
         echo -n "Unkown OS"
@@ -72,11 +84,17 @@ convert_speed () {
 }
 
 run_command () {
-    ipmitool -I lanplus -H "${IP_ADDRESS}" -U root -P calvin raw 0x30 0x30 0x01 0x00 > /dev/null || exit 1
-    echo "Dell r510 fan control set to manual"
+    ipmitool -I lanplus -H "${IP_ADDRESS}" -U root -P calvin raw 0x30 0x30 0x01 0x00 > /dev/null
+    if [ $? != 0 ]; then
+        echo "[FATAL] Failed to set fan control"
+        exit 1
+    else
+        echo "[INFO] Dell r510 fan control set to manual"
+    fi
+    
 
     ipmitool -I lanplus -H "${IP_ADDRESS}" -U root -P calvin raw 0x30 0x30 0x02 0xff 0x"${HEX_SPEED}" &> /dev/null
-    echo "Fan speed on IDRAC ${IDRAC} set to ${SPEED}%"
+    echo "[INFO] Fan speed on IDRAC ${IDRAC} set to ${SPEED}%"
 }
 
 main () {
